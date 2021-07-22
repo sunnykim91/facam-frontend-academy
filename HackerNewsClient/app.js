@@ -1,17 +1,42 @@
-let ajax = new XMLHttpRequest();
+const container = document.getElementById("root");
+const ajax = new XMLHttpRequest();
+const content = document.querySelector("div");
+const NEWS_URL = "https://api.hnpwa.com/v0/news/1.json";
+const CONTENT_URL = "https://api.hnpwa.com/v0/item/@id.json";
 
-ajax.open("GET", "https://api.hnpwa.com/v0/news/1.json", false);
-ajax.send();
+function getData(url) {
+    ajax.open("GET", url, false);
+    ajax.send();
 
-console.log(ajax.response);
-
-const newsFeed = JSON.parse(ajax.response);
-const ul = document.createElement("ul");
-
-for (let i = 0; i <= 10; i++) {
-    const li = document.createElement("li");
-    li.innerHTML = newsFeed[i].title;
-    ul.appendChild(li);
+    return JSON.parse(ajax.response);
 }
 
-document.getElementById("root").appendChild(ul);
+const newsFeed = getData(NEWS_URL);
+const ul = document.createElement("ul");
+
+window.addEventListener("hashchange", function () {
+    const id = location.hash.substr(1);
+    console.log("해시가 변경됨");
+
+    const newsContent = getData(CONTENT_URL.replace("@id", id));
+    const title = document.createElement("h1");
+
+    title.innerHTML = newsContent.title;
+    content.appendChild(title);
+});
+
+for (let i = 0; i <= 10; i++) {
+    const div = document.createElement("div");
+
+    div.innerHTML = `
+    <li>
+        <a href="#${newsFeed[i].id}">
+        ${newsFeed[i].title}(${newsFeed[i].comments_count})
+        </a>
+    </li>
+    `;
+    ul.appendChild(div.firstElementChild);
+}
+
+container.appendChild(ul);
+container.appendChild(content);
